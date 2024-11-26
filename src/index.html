@@ -4,6 +4,8 @@
 
 <head>
     <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
+    <title>User Disabler</title>
+
 </head>
 
 <body>
@@ -26,14 +28,30 @@
                 </div>
             </div>
         </a>
-        <p class="headerBarTitle">App skeleton for dummies</p>
+        <p class="headerBarTitle">OptionSet Sorter</p>
         <button class="headerBarExit" onclick="location.href='../../..';">Exit</button>
     </div>
 
     <div class="mainView">
-        <p>Content goes here...</p>
+        <div class="app-container">
+            <div class="container">
+                <h1>Fix Option Set Sort Order</h1>
 
-        <button onclick="helloWorld()">Hello</button>
+                <label for="optionSetSelect">Select Option Set:</label>
+                <select id="optionSetSelect" class="select-box"></select>
+
+                <div>
+                    <input type="radio" id="start0" name="startSort" value="0" checked>
+                    <label for="start0">Start sort order at 0</label></br>
+                    <input type="radio" id="start1" name="startSort" value="1">
+                    <label for="start1">Start sort order at 1</label>
+                </div>
+
+                <button class="dhis2-button" id="sortButton">Sort</button>
+
+                <div id="result"></div>
+            </div>
+        </div>
     </div>
 </body>
 

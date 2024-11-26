@@ -1,6 +1,6 @@
 {
-  "name": "dhis2_webapp_template",
-  "description": "Template for basic DHIS2 webapps",
+  "name": "optionset_sorter",
+  "description": "Fixes sort order of option sets, by removing gaps.",
   "version": "0.1.0",
   "dependencies": {
     "jquery": "^3.7.1"
@@ -43,7 +43,7 @@
       "48": "img/icons/app_logo_48x48.png",
       "96": "img/icons/app_logo_96x96.png"
     },
-    "name": "DHIS2 Skeleton App for Dummies",
+    "name": "OptionSet Sorter",
     "version": "0.1.0",
     "appType": "APP"
   }
