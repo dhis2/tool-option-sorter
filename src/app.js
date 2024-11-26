@@ -26,7 +26,7 @@ async function fetchOptionSets() {
 window.fixSortOrder = async function() {
     try {
         const selectedOptionSetId = document.getElementById("optionSetSelect").value;
-        const startSort = document.querySelector("input[name=\"startSort\"]:checked").value;
+        const startSort = document.querySelector('input[name="startSort"]:checked').value;
         const response = await d2Get(`/api/options.json?fields=:owner&filter=optionSet.id:eq:${selectedOptionSetId}&paging=false`);
       
         let options = response.options;
@@ -36,18 +36,22 @@ window.fixSortOrder = async function() {
         const payload = { options };
         await d2PostJson("/api/metadata", payload);
 
-        document.getElementById("result").textContent = `Successfully updated ${options.length} options.`;
+        document.getElementById("result-message").textContent = `Success:`;
+        document.getElementById("result-details").innerHTML = `<li>Successfully updated ${options.length} options.</li>`;
+        document.getElementById("result").style.display = 'block';
     } catch (error) {
-        document.getElementById("result").textContent = "Error updating option set: " + error;
+        document.getElementById("result-message").textContent = "Error updating option set:";
+        document.getElementById("result-details").innerHTML = `<li>${error}</li>`;
+        document.getElementById("result").style.display = 'block';
     }
 };
 
 window.validateSortOrder = async function() {
     try {
         const selectedOptionSetId = document.getElementById("optionSetSelect").value;
-        const startSort = parseInt(document.querySelector("input[name=\"startSort\"]:checked").value);
+        const startSort = parseInt(document.querySelector('input[name="startSort"]:checked').value);
         const response = await d2Get(`/api/options.json?fields=:owner&filter=optionSet.id:eq:${selectedOptionSetId}&paging=false`);
-      
+
         let options = response.options;
         options.sort((a, b) => a.sortOrder - b.sortOrder);
 
@@ -61,11 +65,17 @@ window.validateSortOrder = async function() {
             return currentOption.sortOrder;
         }, startSort - 1);
 
-        let resultMessage = `Validation Result:\n- Start index is ${isStartIndexCorrect ? "correct" : "incorrect"}.\n- Number of gaps in sort order: ${gaps}`;
-        document.getElementById("result").textContent = resultMessage;
+        document.getElementById("result-message").textContent = `Validation Result`;
+        document.getElementById("result-details").innerHTML = `
+          <li>Start index is ${isStartIndexCorrect ? "correct" : "incorrect"}.</li>
+          <li>Number of gaps in sort order: ${gaps}</li>
+        `;
+        document.getElementById("result").style.display = 'block';
       
     } catch (error) {
-        document.getElementById("result").textContent = "Error validating option set: " + error;
+        document.getElementById("result-message").textContent = "Error validating option set:";
+        document.getElementById("result-details").innerHTML = `<li>${error}</li>`;
+        document.getElementById("result").style.display = 'block';
     }
 };
 

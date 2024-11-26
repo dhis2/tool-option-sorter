@@ -4,30 +4,45 @@
     align-items: center;
     height: 100vh;
     background-color: #fafafa;
-  }
-  
-  .container {
+}
+
+.container {
     background: white;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 20px 40px;
     width: 300px;
     text-align: center;
-  }
-  
-  .select-box {
+}
+
+.select-box {
     width: 100%;
     margin: 10px 0;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
-  }
-  
-  #result {
-    margin-top: 20px;
-  }
+}
 
-  .dhis2-button {
+#result {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f4f6f8;
+    display: none;
+    /* initially hidden */
+}
+
+.result-message {
+    font-weight: bold;
+}
+
+.result-details {
+    margin-top: 10px;
+    padding-left: 20px;
+    text-align: left;
+}
+
+.dhis2-button {
     background-color: #00796B;
     color: white;
     border: none;
