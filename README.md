@@ -1,5 +1,5 @@
-# DHIS2 App Template for Dummies
-Basic DHIS2 app skeleton.
+# OptionSet sort order fixer
+App to help fix the sort order of optionSets. The sort order can become corrupted in some instance, for example with gaps in the sort order index. This app will keep the current order, but fix these gaps which can be problematic in 40 and below in particular.
 
 ## License
 © Copyright 
