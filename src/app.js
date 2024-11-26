@@ -42,4 +42,33 @@ window.fixSortOrder = async function() {
     }
 };
 
+window.validateSortOrder = async function() {
+    try {
+        const selectedOptionSetId = document.getElementById("optionSetSelect").value;
+        const startSort = parseInt(document.querySelector("input[name=\"startSort\"]:checked").value);
+        const response = await d2Get(`/api/options.json?fields=:owner&filter=optionSet.id:eq:${selectedOptionSetId}&paging=false`);
+      
+        let options = response.options;
+        options.sort((a, b) => a.sortOrder - b.sortOrder);
+
+        let gaps = 0;
+        let isStartIndexCorrect = options.length > 0 && options[0].sortOrder === startSort;
+
+        options.reduce((prevSortOrder, currentOption) => {
+            if (currentOption.sortOrder !== prevSortOrder + 1) {
+                gaps++;
+            }
+            return currentOption.sortOrder;
+        }, startSort - 1);
+
+        let resultMessage = `Validation Result:\n- Start index is ${isStartIndexCorrect ? "correct" : "incorrect"}.\n- Number of gaps in sort order: ${gaps}`;
+        document.getElementById("result").textContent = resultMessage;
+      
+    } catch (error) {
+        document.getElementById("result").textContent = "Error validating option set: " + error;
+    }
+};
+
+
+document.getElementById("validateButton").addEventListener("click", window.validateSortOrder);
 document.getElementById("sortButton").addEventListener("click", window.fixSortOrder);
