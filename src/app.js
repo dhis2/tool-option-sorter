@@ -26,7 +26,7 @@ async function fetchOptionSets() {
 window.fixSortOrder = async function() {
     try {
         const selectedOptionSetId = document.getElementById("optionSetSelect").value;
-        const startSort = document.querySelector('input[name="startSort"]:checked').value;
+        const startSort = document.querySelector("input[name=\"startSort\"]:checked").value;
         const response = await d2Get(`/api/options.json?fields=:owner&filter=optionSet.id:eq:${selectedOptionSetId}&paging=false`);
       
         let options = response.options;
@@ -36,20 +36,20 @@ window.fixSortOrder = async function() {
         const payload = { options };
         await d2PostJson("/api/metadata", payload);
 
-        document.getElementById("result-message").textContent = `Success:`;
+        document.getElementById("result-message").textContent = "Success:";
         document.getElementById("result-details").innerHTML = `<li>Successfully updated ${options.length} options.</li>`;
-        document.getElementById("result").style.display = 'block';
+        document.getElementById("result").style.display = "block";
     } catch (error) {
         document.getElementById("result-message").textContent = "Error updating option set:";
         document.getElementById("result-details").innerHTML = `<li>${error}</li>`;
-        document.getElementById("result").style.display = 'block';
+        document.getElementById("result").style.display = "block";
     }
 };
 
 window.validateSortOrder = async function() {
     try {
         const selectedOptionSetId = document.getElementById("optionSetSelect").value;
-        const startSort = parseInt(document.querySelector('input[name="startSort"]:checked').value);
+        const startSort = parseInt(document.querySelector("input[name=\"startSort\"]:checked").value);
         const response = await d2Get(`/api/options.json?fields=:owner&filter=optionSet.id:eq:${selectedOptionSetId}&paging=false`);
 
         let options = response.options;
@@ -57,25 +57,29 @@ window.validateSortOrder = async function() {
 
         let gaps = 0;
         let isStartIndexCorrect = options.length > 0 && options[0].sortOrder === startSort;
+        let previousSortOrder = isStartIndexCorrect ? startSort : options[0].sortOrder; // Use the first option's sortOrder if start index is incorrect
 
-        options.reduce((prevSortOrder, currentOption) => {
-            if (currentOption.sortOrder !== prevSortOrder + 1) {
+        for (let i = 1; i < options.length; i++) {
+            if (options[i].sortOrder !== previousSortOrder + 1) {
                 gaps++;
             }
-            return currentOption.sortOrder;
-        }, startSort - 1);
+            previousSortOrder = options[i].sortOrder;
+        }
 
-        document.getElementById("result-message").textContent = `Validation Result`;
-        document.getElementById("result-details").innerHTML = `
-          <li>Start index is ${isStartIndexCorrect ? "correct" : "incorrect"}.</li>
+        let resultMessage = "Validation Result";
+        let resultDetails = `
+          <li>Start index ${isStartIndexCorrect ? "matches" : "doesn't match"} selection.</li>
           <li>Number of gaps in sort order: ${gaps}</li>
         `;
-        document.getElementById("result").style.display = 'block';
       
+        document.getElementById("result-message").textContent = resultMessage;
+        document.getElementById("result-details").innerHTML = resultDetails;
+        document.getElementById("result").style.display = "block";
+
     } catch (error) {
         document.getElementById("result-message").textContent = "Error validating option set:";
         document.getElementById("result-details").innerHTML = `<li>${error}</li>`;
-        document.getElementById("result").style.display = 'block';
+        document.getElementById("result").style.display = "block";
     }
 };
 
