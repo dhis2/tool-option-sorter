@@ -1,20 +1,19 @@
 {
-  "name": "optionset_sorter",
-  "description": "Fixes sort order of option sets, by removing gaps.",
+  "name": "tool_optionset_sorter",
+  "description": "Tool to validate and fix sort order of option sets, by removing gaps in sort order index.",
   "version": "0.1.0",
   "dependencies": {
     "jquery": "^3.7.1"
   },
   "devDependencies": {
-    "@dhis2/cli-style": "github:dhis2/cli-style",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.15.0",
     "copy-webpack-plugin": "^12.0.2",
     "css-loader": "^7.1.2",
     "d2-manifest": "^1.0.0",
     "eslint": "^9.15.0",
-    "@eslint/eslintrc": "^3.2.0",
-    "@eslint/js": "^9.15.0",
-    "globals": "^15.12.0",
     "file-loader": "^6.2.0",
+    "globals": "^15.12.0",
     "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.6.3",
     "style-loader": "^4.0.0",
@@ -36,14 +35,14 @@
   "manifest.webapp": {
     "developer": {
       "company": "HISP Centre - Univeristy of Oslo",
-      "email": "dev@dhis2.org",
-      "name": "HISP Centre"
+      "email": "olav@dhis2.org",
+      "name": "Implementation team"
     },
     "icons": {
       "48": "img/icons/app_logo_48x48.png",
       "96": "img/icons/app_logo_96x96.png"
     },
-    "name": "OptionSet Sorter",
+    "name": "OptionSet Sort Tool",
     "version": "0.1.0",
     "appType": "APP"
   }
