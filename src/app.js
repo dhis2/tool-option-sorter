@@ -104,7 +104,6 @@ window.validateSortOrder = async function(validateOption) {
 async function validateSelectedOptionSet() {
     try {
         const selectedOptionSetId = document.getElementById("optionSetSelect").value;
-        const startSort = parseInt(document.querySelector("input[name=\"startSort\"]:checked").value);
         const response = await d2Get(`/api/options.json?fields=:owner&filter=optionSet.id:eq:${selectedOptionSetId}&paging=false`);
 
         let options = response.options;
