@@ -37,7 +37,7 @@
             <label>OptionSet</label>
             <div class="input-field">
                 <label for="optionSetSelect">Select Option Set:</label>
-                <select id="optionSetSelect" class="browser-default"></select>
+                <select id="optionSetSelect" class="browser-default" disabled></select>
             </div>
 
             <div class="input-field">
@@ -56,14 +56,41 @@
             </div>
 
             <div class="center-align">
-                <button class="btn waves-effect waves-light" id="validateButton">Validate</button>
-                <button class="btn waves-effect waves-light" id="sortButton">Update Sort</button>
+                <a class='dropdown-trigger btn' href='#' data-target='validateDropdown' id="validateButton">Validate</a>
+                <ul id='validateDropdown' class='dropdown-content'>
+                    <li id="validateSelectedDropdown"><a href="#!" onclick="window.validateSortOrder('selected')">Selected</a></li>
+                    <li><a href="#!" onclick="window.validateSortOrder('all')">All</a></li>
+                </ul>
+                <button class="btn waves-effect waves-light" id="sortButton" disabled>Update Sort</button>
             </div>
+            <div class="progress" id="validationProgress" style="display: none;">
+                <div class="determinate" id="validationProgressBar" style="width: 0%;"></div>
+            </div>
+            <div id="result" class="card-panel" style="display: none;">
+                <ul id="result-details" class="collection" style="display: none;"></ul>
+                <table id="result-table" class="striped" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>ID</th>
+                            <th>Index Start</th>
+                            <th>Index Gaps</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-            <div id="result" class="card-panel teal lighten-4" style="display: none;">
-                <span id="result-message" class="card-title"></span>
-                <ul id="result-details" class="collection"></ul>
-            </div>
+    <!-- Modal Structure -->
+    <div id="errorModal" class="modal">
+        <div class="modal-content">
+            <h4>Error</h4>
+            <p id="modal-error-message"></p>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
         </div>
     </div>
 </body>
