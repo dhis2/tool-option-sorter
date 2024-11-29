@@ -1,9 +1,12 @@
 # OptionSet sort order fixer
-App to help fix the sort order of optionSets. The sort order can become corrupted in some instance, for example with gaps in the sort order index. This app will keep the current order, but fix these gaps which can be problematic in 40 and below in particular.
+Tool to fix the sort order of optionSets. The sort order can become corrupted in some instance, for example with gaps in the sort order index. This app will keep the current overall order, but fix these gaps which can be problematic in 40 and below in particular. I.e. if the sort order is `1, 2, 3, 5, 6, 7, 9`, updating it using this tool will set the sort order to `1, 2, 3, 4, 5, 6, 7`, maintaining the order of the options.
+
+> **WARNING**
+> This tool is intended to be used by system administrators to perform specific tasks, it is not intended for end users. It is available as a DHIS2 app, but has not been through the same rigorous testing as normal core apps. It should be used with care, and always tested in a development environment.
+
 
 ## License
-© Copyright 
-
+© Copyright University of Oslo 2024
 
 ## Getting started
 
