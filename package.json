@@ -3,7 +3,9 @@
   "description": "Tool to validate and fix sort order of option sets, by removing gaps in sort order index.",
   "version": "0.1.0",
   "dependencies": {
-    "jquery": "^3.7.1"
+    "choices.js": "^11.0.2",
+    "jquery": "^3.7.1",
+    "materialize-css": "^1.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

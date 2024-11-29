@@ -2,22 +2,27 @@
 
 //JS
 import { d2Get, d2PostJson } from "./js/d2api.js";
+import Choices from "choices.js";
 
 //CSS
 import "./css/header.css";
 import "./css/style.css";
+import "materialize-css/dist/css/materialize.min.css";
+import "choices.js/public/assets/styles/choices.min.css";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    await fetchOptionSets();
+    const selectElement = document.getElementById("optionSetSelect");
+    const choices = new Choices(selectElement, { searchEnabled: false });
+    await fetchOptionSets(choices);
 });
 
-async function fetchOptionSets() {
+async function fetchOptionSets(choices) {
     try {
         const optionSets = await d2Get("/api/optionSets.json?fields=name,id&paging=false");
-        const selectElement = document.getElementById("optionSetSelect");
-        selectElement.innerHTML = optionSets.optionSets.map(optionSet => 
-            `<option value="${optionSet.id}">${optionSet.name}</option>`
-        ).join("");
+        choices.setChoices(optionSets.optionSets.map(optionSet => ({
+            value: optionSet.id,
+            label: optionSet.name
+        })), "value", "label", true);
     } catch (error) {
         document.getElementById("result").textContent = "Error fetching option sets: " + error;
     }
