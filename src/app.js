@@ -12,19 +12,28 @@ import "materialize-css/dist/css/materialize.min.css";
 import "choices.js/public/assets/styles/choices.min.css";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    const sortButton = document.getElementById("sortButton");
     const validateButton = document.getElementById("validateButton");
     const validateAllButton = document.getElementById("validateAllButton");
     const selectElement = document.getElementById("optionSetSelect");
 
-    sortButton.addEventListener("click", window.fixSortOrder);
-    validateButton.addEventListener("click", () => window.validateSortOrder("selected"));
-    validateAllButton.addEventListener("click", () => window.validateSortOrder("all"));
-    selectElement.addEventListener("change", () => {
-        const isOptionSetSelected = selectElement.value !== "";
-        sortButton.disabled = !isOptionSetSelected;
-        validateButton.disabled = !isOptionSetSelected;
-    });
+    if (validateButton) {
+        validateButton.addEventListener("click", () => window.validateSortOrder("selected"));
+    } else {
+        console.error("Element with id 'validateButton' not found.");
+    }
+    if (validateAllButton) {
+        validateAllButton.addEventListener("click", () => window.validateSortOrder("all"));
+    } else {
+        console.error("Element with id 'validateAllButton' not found.");
+    }
+    if (selectElement) {
+        selectElement.addEventListener("change", () => {
+            const isOptionSetSelected = selectElement.value !== "";
+            if (validateButton) validateButton.disabled = !isOptionSetSelected;
+        });
+    } else {
+        console.error("Element with id 'optionSetSelect' not found.");
+    }
 
     const choices = new Choices(selectElement, {
         searchEnabled: false,
@@ -39,8 +48,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     M.Modal.init(modalElems);
 
     await fetchOptionSets(choices);
-    validateButton.disabled = true;
-    sortButton.disabled = true;
+    if (validateButton) validateButton.disabled = true;
 });
 
 
@@ -106,6 +114,43 @@ window.validateSortOrder = async function(validateOption) {
 function addToResultTable(resultTableBody) {
     const resultTableBodyElem = document.getElementById("result-body");
     resultTableBodyElem.innerHTML = resultTableBody; // Set innerHTML to tbody
+    // Add event listeners for fix buttons
+    Array.from(resultTableBodyElem.querySelectorAll(".fix-btn")).forEach(btn => {
+        btn.addEventListener("click", async function() {
+            const optionSetId = this.getAttribute("data-id");
+            this.disabled = true; // Disable button while processing
+            await fixSortOrderRow(optionSetId, this);
+        });
+    });
+}
+
+async function fixSortOrderRow(optionSetId, btnElem) {
+    try {
+        const response = await d2Get(`/api/options.json?fields=:owner&filter=optionSet.id:eq:${optionSetId}&paging=false`);
+        let options = response.options;
+        options.sort((a, b) => a.sortOrder - b.sortOrder);
+        const minSortOrder = options.length > 0 ? options[0].sortOrder : 1;
+        options.forEach((option, index) => option.sortOrder = minSortOrder + index);
+        const payload = { options };
+        await d2PostJson("/api/metadata", payload);
+        M.toast({html: `Successfully updated ${options.length} options.`});
+        // Remove row from table
+        const row = btnElem.closest("tr");
+        if (row) row.remove();
+        // If table is empty, show message
+        const resultTableBodyElem = document.getElementById("result-body");
+        if (resultTableBodyElem.children.length === 0) {
+            let resultMessageElem = document.getElementById("result-message");
+            resultMessageElem.textContent = "No sort order gaps found";
+            resultMessageElem.style.display = "block";
+            document.getElementById("result-table").style.display = "none";
+        }
+    } catch (error) {
+        btnElem.disabled = false; // Re-enable button if error
+        document.getElementById("modal-error-message").textContent = error;
+        const errorModal = M.Modal.getInstance(document.getElementById("errorModal"));
+        errorModal.open();
+    }
 }
 
 async function validateSelectedOptionSet() {
@@ -125,26 +170,35 @@ async function validateSelectedOptionSet() {
         }
 
         let resultTableBody = "";
+        let resultMessageElem = document.getElementById("result-message");
         if (gaps > 0) {
             resultTableBody = `
                 <tr>
                     <td>${document.getElementById("optionSetSelect").selectedOptions[0].text}</td>
                     <td>${selectedOptionSetId}</td>
                     <td>${gaps}</td>
+                    <td><button class='btn fix-btn' data-id='${selectedOptionSetId}'>Fix</button></td>
                 </tr>
             `;
+            if (resultMessageElem) resultMessageElem.style.display = "none";
+            document.getElementById("result-table").style.display = "table";
+        } else {
+            if (resultMessageElem) {
+                resultMessageElem.textContent = "No sort order gaps found";
+                resultMessageElem.style.display = "block";
+            }
+            document.getElementById("result-table").style.display = "none";
         }
 
         addToResultTable(resultTableBody);
-
-        // Display the result section
         document.getElementById("result").style.display = "block";
-
     } catch (error) {
         console.error("Error validating option set:", error);
         let resultMessageElem = document.getElementById("result-message");
-        resultMessageElem.textContent = "Error validating option set:" + error;
-        resultMessageElem.style.display = "block";
+        if (resultMessageElem) {
+            resultMessageElem.textContent = "Error validating option set:" + error;
+            resultMessageElem.style.display = "block";
+        }
     }
 }
 
@@ -194,6 +248,7 @@ async function validateAllOptionSets() {
                     <td>${result.name}</td>
                     <td>${result.id}</td>
                     <td>${result.gaps}</td>
+                    <td><button class='btn fix-btn' data-id='${result.id}'>Fix</button></td>
                 </tr>
             `).join("");
             document.getElementById("result-message").style.display = "none";
