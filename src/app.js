@@ -14,13 +14,16 @@ import "choices.js/public/assets/styles/choices.min.css";
 document.addEventListener("DOMContentLoaded", async () => {
     const sortButton = document.getElementById("sortButton");
     const validateButton = document.getElementById("validateButton");
+    const validateAllButton = document.getElementById("validateAllButton");
     const selectElement = document.getElementById("optionSetSelect");
 
     sortButton.addEventListener("click", window.fixSortOrder);
+    validateButton.addEventListener("click", () => window.validateSortOrder("selected"));
+    validateAllButton.addEventListener("click", () => window.validateSortOrder("all"));
     selectElement.addEventListener("change", () => {
         const isOptionSetSelected = selectElement.value !== "";
         sortButton.disabled = !isOptionSetSelected;
-        updateValidateDropdown(isOptionSetSelected); // Update validate dropdown state
+        validateButton.disabled = !isOptionSetSelected;
     });
 
     const choices = new Choices(selectElement, {
@@ -36,7 +39,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     M.Modal.init(modalElems);
 
     await fetchOptionSets(choices);
-    validateButton.disabled = false;
+    validateButton.disabled = true;
+    sortButton.disabled = true;
 });
 
 
@@ -50,37 +54,35 @@ async function fetchOptionSets(choices) {
         })), "value", "label", false);
 
         const selectElement = document.getElementById("optionSetSelect");
-        selectElement.disabled = false; // Enable the dropdown after options are added
+        if (selectElement) {
+            selectElement.disabled = false; // Enable the dropdown after options are added
+        }
         choices.enable(); // Enable the choices dropdown as well
 
-        document.getElementById("validateButton").disabled = false; // Enable the validate button
-
-        console.log(selectElement.value);
-        updateValidateDropdown(false);
+        const validateButton = document.getElementById("validateButton");
+        if (validateButton) {
+            validateButton.disabled = false; // Enable the validate button
+        }
     } catch (error) {
-        document.getElementById("result").textContent = "Error fetching option sets: " + error;
+        console.error("Error fetching option sets:", error);
+        const resultElem = document.getElementById("result");
+        if (resultElem) {
+            resultElem.textContent = "Error fetching option sets: " + error;
+        }
     }
 }
 
-
-function updateValidateDropdown(isOptionSetSelected) {
-    const selectedOption = document.getElementById("validateSelectedDropdown");
-    if (isOptionSetSelected) {
-        selectedOption.style.display = "block";
-    } else {
-        selectedOption.style.display = "none";
-    }
-}
 
 window.fixSortOrder = async function() {
     try {
         const selectedOptionSetId = document.getElementById("optionSetSelect").value;
-        const startSort = document.querySelector("input[name=\"startSort\"]:checked").value;
         const response = await d2Get(`/api/options.json?fields=:owner&filter=optionSet.id:eq:${selectedOptionSetId}&paging=false`);
       
         let options = response.options;
         options.sort((a, b) => a.sortOrder - b.sortOrder);
-        options.forEach((option, index) => option.sortOrder = parseInt(startSort) + index);
+        // Only fix gaps, start from the minimum sortOrder
+        const minSortOrder = options.length > 0 ? options[0].sortOrder : 1;
+        options.forEach((option, index) => option.sortOrder = minSortOrder + index);
 
         const payload = { options };
         await d2PostJson("/api/metadata", payload);
@@ -101,17 +103,19 @@ window.validateSortOrder = async function(validateOption) {
     }
 };
 
+function addToResultTable(resultTableBody) {
+    const resultTableBodyElem = document.getElementById("result-body");
+    resultTableBodyElem.innerHTML = resultTableBody; // Set innerHTML to tbody
+}
+
 async function validateSelectedOptionSet() {
     try {
         const selectedOptionSetId = document.getElementById("optionSetSelect").value;
         const response = await d2Get(`/api/options.json?fields=:owner&filter=optionSet.id:eq:${selectedOptionSetId}&paging=false`);
-
         let options = response.options;
         options.sort((a, b) => a.sortOrder - b.sortOrder);
-
         let gaps = 0;
-        let actualStartIndex = options.length > 0 ? options[0].sortOrder : null;
-        let previousSortOrder = actualStartIndex;
+        let previousSortOrder = options.length > 0 ? options[0].sortOrder : null;
 
         for (let i = 1; i < options.length; i++) {
             if (options[i].sortOrder !== previousSortOrder + 1) {
@@ -120,32 +124,33 @@ async function validateSelectedOptionSet() {
             previousSortOrder = options[i].sortOrder;
         }
 
-        let resultTableBody = `
-            <tr>
-                <td>${document.getElementById("optionSetSelect").selectedOptions[0].text}</td>
-                <td>${selectedOptionSetId}</td>
-                <td>${actualStartIndex}</td>
-                <td>${gaps}</td>
-            </tr>
-        `;
+        let resultTableBody = "";
+        if (gaps > 0) {
+            resultTableBody = `
+                <tr>
+                    <td>${document.getElementById("optionSetSelect").selectedOptions[0].text}</td>
+                    <td>${selectedOptionSetId}</td>
+                    <td>${gaps}</td>
+                </tr>
+            `;
+        }
 
-        document.getElementById("result-details").style.display = "none";
-        document.getElementById("result-table").querySelector("tbody").innerHTML = resultTableBody;
+        addToResultTable(resultTableBody);
+
+        // Display the result section
         document.getElementById("result").style.display = "block";
-        document.getElementById("result-table").style.display = "table";
 
     } catch (error) {
-        document.getElementById("result-message").textContent = "Error validating option set:";
-        document.getElementById("result-details").innerHTML = `<li>${error}</li>`;
-        document.getElementById("result-details").style.display = "block";
-        document.getElementById("result-table").style.display = "none";
+        console.error("Error validating option set:", error);
+        let resultMessageElem = document.getElementById("result-message");
+        resultMessageElem.textContent = "Error validating option set:" + error;
+        resultMessageElem.style.display = "block";
     }
 }
 
 async function validateAllOptionSets() {
     try {
         const optionSets = await d2Get("/api/optionSets.json?fields=name,id&paging=false");
-        const expectedStartIndex = parseInt(document.querySelector("input[name=\"startSort\"]:checked").value);
         let validationResults = [];
 
         const progressBar = document.getElementById("validationProgressBar");
@@ -160,8 +165,7 @@ async function validateAllOptionSets() {
             options.sort((a, b) => a.sortOrder - b.sortOrder);
 
             let gaps = 0;
-            let actualStartIndex = options.length > 0 ? options[0].sortOrder : null;
-            let previousSortOrder = actualStartIndex;
+            let previousSortOrder = options.length > 0 ? options[0].sortOrder : null;
 
             for (let j = 1; j < options.length; j++) {
                 if (options[j].sortOrder !== previousSortOrder + 1) {
@@ -169,17 +173,13 @@ async function validateAllOptionSets() {
                 }
                 previousSortOrder = options[j].sortOrder;
             }
-            console.log("OptionSet: ", optionSet.name, "StartIndex: ", actualStartIndex, "Gaps: ", gaps);
-
-            if (actualStartIndex != expectedStartIndex || gaps > 0) {
+            if (gaps > 0) {
                 validationResults.push({
                     name: optionSet.name,
                     id: optionSet.id,
-                    startIndex: actualStartIndex,
                     gaps: gaps
                 });
             }
-
             // Update progress bar
             const progress = ((i + 1) / optionSets.optionSets.length) * 100;
             progressBar.style.width = `${progress}%`;
@@ -187,27 +187,31 @@ async function validateAllOptionSets() {
 
         progressContainer.style.display = "none";
 
-        let resultTableBody = validationResults.map(result => `
-            <tr>
-                <td>${result.name}</td>
-                <td>${result.id}</td>
-                <td>${result.startIndex}</td>
-                <td>${result.gaps}</td>
-            </tr>
-        `).join("");
-
-        document.getElementById("result-details").style.display = "none";
-        document.getElementById("result-table").querySelector("tbody").innerHTML = resultTableBody;
+        let resultTableBody = "";
+        if (validationResults.length > 0) {
+            resultTableBody = validationResults.map(result => `
+                <tr>
+                    <td>${result.name}</td>
+                    <td>${result.id}</td>
+                    <td>${result.gaps}</td>
+                </tr>
+            `).join("");
+            document.getElementById("result-message").style.display = "none";
+            document.getElementById("result-table").style.display = "table";
+        } else {
+            let resultMessageElem = document.getElementById("result-message");
+            resultMessageElem.textContent = "No sort order gaps found";
+            resultMessageElem.style.display = "block";
+            document.getElementById("result-table").style.display = "none";
+        }
+        
+        addToResultTable(resultTableBody);
+        
         document.getElementById("result").style.display = "block";
-        document.getElementById("result-table").style.display = "table";
-
     } catch (error) {
         document.getElementById("result-message").textContent = "Error validating option sets:";
         document.getElementById("result-details").innerHTML = `<li>${error}</li>`;
-        document.getElementById("result-details").style.display = "block";
         document.getElementById("result-table").style.display = "none";
         document.getElementById("validationProgress").style.display = "none";
     }
 }
-
-

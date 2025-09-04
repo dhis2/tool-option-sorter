@@ -40,46 +40,32 @@
                 <select id="optionSetSelect" class="browser-default" disabled></select>
             </div>
 
-            <div class="input-field">
-                <p>
-                    <label>
-                        <input type="radio" id="start0" name="startSort" value="0" checked />
-                        <span>Start sort order at 0</span>
-                    </label>
-                </p>
-                <p>
-                    <label>
-                        <input type="radio" id="start1" name="startSort" value="1" />
-                        <span>Start sort order at 1</span>
-                    </label>
-                </p>
-            </div>
-
             <div class="center-align">
-                <a class='dropdown-trigger btn' href='#' data-target='validateDropdown' id="validateButton">Validate</a>
-                <ul id='validateDropdown' class='dropdown-content'>
-                    <li id="validateSelectedDropdown"><a href="#!" onclick="window.validateSortOrder('selected')">Selected</a></li>
-                    <li><a href="#!" onclick="window.validateSortOrder('all')">All</a></li>
-                </ul>
-                <button class="btn waves-effect waves-light" id="sortButton" disabled>Update Sort</button>
+                <button class="btn waves-effect waves-light" id="validateAllButton">Validate all</button>
+                <button class="btn waves-effect waves-light" id="validateButton" disabled>Validate selected</button>
+                <button class="btn waves-effect waves-light" id="sortButton" disabled>Update selected</button>
             </div>
-            <div class="progress" id="validationProgress" style="display: none;">
+            <div id="validationProgress" class="progress" style="display: none;">
                 <div class="determinate" id="validationProgressBar" style="width: 0%;"></div>
             </div>
-            <div id="result" class="card-panel" style="display: none;">
+
+            <div id="result" class="card-panel">
+                <div id="result-message" style="display:none;"></div>
                 <ul id="result-details" class="collection" style="display: none;"></ul>
                 <table id="result-table" class="striped" style="display: none;">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>ID</th>
-                            <th>Index Start</th>
                             <th>Index Gaps</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody id="result-body">
+                        <!-- Rows will be dynamically inserted here -->
+                    </tbody>
                 </table>
             </div>
+
         </div>
     </div>
 
