@@ -2,6 +2,8 @@
 
 //JS
 import { d2Get, d2PostJson } from "./js/d2api.js";
+import { loadLegacyHeaderBarIfNeeded } from "./js/check-header-bar.js";
+
 import Choices from "choices.js";
 import M from "materialize-css";
 
@@ -270,3 +272,6 @@ async function validateAllOptionSets() {
         document.getElementById("validationProgress").style.display = "none";
     }
 }
+
+
+loadLegacyHeaderBarIfNeeded();
