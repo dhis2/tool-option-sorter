@@ -1,7 +1,7 @@
 {
   "name": "tool_optionset_sorter",
   "description": "Tool to validate and fix sort order of option sets, by removing gaps in sort order index.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "dependencies": {
     "choices.js": "^11.0.2",
     "jquery": "^3.7.1",
